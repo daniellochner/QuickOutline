@@ -274,9 +274,10 @@ public class Outline : MonoBehaviour
             // Calculate the average normal
             var smoothNormal = Vector3.zero;
 
+            var meshNormals = mesh.normals; // Cache mesh normals.
             foreach (var pair in group)
             {
-                smoothNormal += mesh.normals[pair.Value];
+                smoothNormal += meshNormals[pair.Value];
             }
 
             smoothNormal.Normalize();
