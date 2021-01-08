@@ -20,7 +20,8 @@ public class Outline : MonoBehaviour
     [SerializeField, Range(0f, 10f)] private float outlineWidth = 2f;
 
     [Header("Optional")]
-    [SerializeField, Tooltip("Precompute enabled: Per-vertex calculations are performed in the editor and serialized with the object. Precompute disabled: Per-vertex calculations are performed at runtime in Awake(). This may cause a pause for large meshes.")] private bool precomputeOutline;
+    [SerializeField, Tooltip("Precompute enabled: Per-vertex calculations are performed in the editor and serialized with the object. Precompute disabled: Per-vertex calculations are performed at runtime in Awake(). This may cause a pause for large meshes.")] private bool precomputeOutline = false;
+    [SerializeField] private bool includeSubMeshes = false;
 
     [SerializeField, HideInInspector] private List<Mesh> bakeKeys = new List<Mesh>();
     [SerializeField, HideInInspector] private List<ListVector3> bakeValues = new List<ListVector3>();
@@ -75,6 +76,27 @@ public class Outline : MonoBehaviour
     #region Methods
     private void Awake()
     {
+        if (includeSubMeshes)
+        {
+            foreach (var skinnedMeshRenderer in GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                if (skinnedMeshRenderer.sharedMesh.subMeshCount > 1)
+                {
+                    skinnedMeshRenderer.sharedMesh.subMeshCount = skinnedMeshRenderer.sharedMesh.subMeshCount + 1;
+                    skinnedMeshRenderer.sharedMesh.SetTriangles(skinnedMeshRenderer.sharedMesh.triangles, skinnedMeshRenderer.sharedMesh.subMeshCount - 1);
+                }
+            }
+
+            foreach (var meshFilter in GetComponentsInChildren<MeshFilter>())
+            {
+                if (meshFilter.sharedMesh.subMeshCount > 1)
+                {
+                    meshFilter.sharedMesh.subMeshCount = meshFilter.sharedMesh.subMeshCount + 1;
+                    meshFilter.sharedMesh.SetTriangles(meshFilter.sharedMesh.triangles, meshFilter.sharedMesh.subMeshCount - 1);
+                }
+            }
+        }
+
         // Cache renderers
         renderers = GetComponentsInChildren<Renderer>();
 
