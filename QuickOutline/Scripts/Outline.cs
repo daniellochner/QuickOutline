@@ -78,13 +78,22 @@ public class Outline : MonoBehaviour
     {
         if (includeSubMeshes)
         {
-            foreach (var meshFilter in GetComponentsInChildren<MeshFilter>())
+            foreach (MeshFilter meshFilter in GetComponentsInChildren<MeshFilter>())
             {
                 Mesh mesh = meshFilter.mesh;
                 if (mesh.subMeshCount > 1)
                 {
                     mesh.subMeshCount = mesh.subMeshCount + 1;
-                    mesh.SetTriangles(meshFilter.sharedMesh.triangles, mesh.subMeshCount - 1);
+                    mesh.SetTriangles(mesh.triangles, mesh.subMeshCount - 1);
+                }
+            }
+            foreach (SkinnedMeshRenderer skinnedMeshRenderer in GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                Mesh mesh = skinnedMeshRenderer.sharedMesh;
+                if (mesh.subMeshCount > 1 && mesh.GetTriangles(mesh.subMeshCount - 1).Length != mesh.triangles.Length) // Necessary to prevent a memory leak (since we are modifying the sharedMesh).
+                {
+                    mesh.subMeshCount = skinnedMeshRenderer.sharedMesh.subMeshCount + 1;
+                    mesh.SetTriangles(skinnedMeshRenderer.sharedMesh.triangles, skinnedMeshRenderer.sharedMesh.subMeshCount - 1);
                 }
             }
         }
